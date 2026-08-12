@@ -1,0 +1,51 @@
+# regionBegin: important links
+links:
+  - name: 'docs: about'
+    url: https://www.voidtools.com/support/everything/using_everything/
+    
+  - name: "docs: what's new 1.5"
+    url: https://www.voidtools.com/everything-1.5/#new
+
+  - name: 'docs: new Property metadata'
+    url: https://www.voidtools.com/support/everything/properties/
+
+  - name: 'docs: search -> modifiers'
+    url: https://www.voidtools.com/support/everything/search_modifiers/
+  - name: 'docs: search -> syntax'
+    url: https://www.voidtools.com/support/everything/search_syntax/
+  - name: 'docs: search -> operator precedence'
+    url: https://www.voidtools.com/support/everything/ini/#operator_precedence
+  - name: 'docs: search -> functions'
+    url: https://www.voidtools.com/support/everything/search_functions/
+
+# regionBegin: inline examples
+snippets:
+  - name: 'GroupColors Example 1'
+    desc: |
+        Enable colors. Group by depends on the current `sort:` function (and optionally `distinct:` )
+    code: |
+        < ext:code-workspace dm:last10weeks > group-colors: 
+  - name: 'GroupColors Example 2'
+    desc: |
+        You can use `distinct:` for **unique grouping** and `sort:` for order and `group-colors:`
+    code: |
+        < ext:code-workspace > distinct:parent group-colors: sort:parent
+
+  - name: 'GroupColors Example 3'
+    code: |
+        < path:< !AppData !"c:\users"> > < ext:svg dm:last10weeks > group-colors:  < IgnorePrograms: > < IgnoreWindows: >
+    
+  - name: 'GroupColors Example 4'
+    desc: |
+        Excludes folder named `AppData` and `c:\users`
+        Filters by `*.svg` and `date-modified:last10weeks`
+    code: |
+        < path:< !AppData !"c:\users"> > < ext:svg dm:last10weeks > group-colors:    
+
+  - name: 'Recent: Code'
+    desc: |
+        Find files under a list of parent folders: `c:\2025` and `c:\2026`
+        They must have been modified in the last 3 months
+        They must be one of the following file types: `ts`, `js`, `svg`, `md`, `html`, `code-workspace`
+    code: |
+        path:< c:\2025 | c:\2026 > < ext:ts;js;svg;md;html;code-workspace dm:last3months >
