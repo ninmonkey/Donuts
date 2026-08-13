@@ -1,0 +1,18 @@
+# regionBegin: important links
+links:
+  - name: 'source'
+    url: https://github.com/ninmonkey/GitServed
+
+# regionBegin: inline examples
+snippets:
+  - name: 'Rebuild source and start serving'
+    desc: |
+        Go to the cloned directory
+        Rebuild the GitServe.psm1 with any changes to the source
+        -Force import changes
+        Start serving on port 3001
+    code: |
+        pushd 'C:\data\myGit\GitServed';
+        . .\Build\Build.Module.ps1;
+        ipmo ./Gitserve -PassThru -Force -Verbose:$false;
+        GitServe.Start -PSHost -Port 3001;

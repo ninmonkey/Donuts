@@ -1,0 +1,19 @@
+# regionBegin: important links
+links:
+  - name: 'Where-Object'
+    url: https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/where-object
+
+# regionBegin: inline examples
+snippets:
+  - name: 'Show recently modified folders'
+    desc: |
+        Find all Folders
+        Only show ones within a specific date range: 2024-01 to 2024-03
+
+        This is not the fastest way to filter, but it's easy to understand
+    code: |
+        # Also works in WinPS 5.1 but you have to move | to use multi-line commands there
+        Get-ChildItem c:\ -Directory
+            | ? LastWriteTime -gt ([datetime]'2024-01-01')
+            | ? LastWriteTime -le ([datetime]'2024-03-01')
+            | Sort-Object LastWriteTime
