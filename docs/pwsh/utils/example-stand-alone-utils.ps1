@@ -109,6 +109,7 @@ function WriteInfo {
     )
 
     $complement = Pansies\Get-Complement -Color $BgColor -HighContrast:( -not $WithoutHighContrast )
+
     $Input
     | Pansies\New-Text -bg $BgColor -fg $complement
     | JoinPre -Depth $Depth
@@ -129,4 +130,42 @@ function WriteContrast {
         return
     }
     $Input | New-Text -fg $fg  -bg $Color | Write-Host
+}
+
+
+function JoinSep {
+    param(
+       [int] $Depth = 0,
+       [string] $Prefix = '',
+
+       [string] $Separator = "`n"
+    )
+    $DepthStr = '  ' * $Depth -join ''
+    $Start = "${DepthStr}${Prefix}"
+    $template = "${Start}" + '{0}'
+    $Input | Join-String -f $Template -sep $Separator
+}
+
+function JoinUL {
+    <#
+    .EXAMPLE
+        > 0..2 | JoinUL
+        - 0
+        - 1
+        - 2
+    #>
+    param()
+    $Input | JoinSep -Prefix '- '
+}
+
+function SplitNL {
+    <#
+    .SYNOPSIS
+        Split pipeline strings by newlines
+    .EXAMPLE
+        # allows you to fix single string commands like
+        > 0..2 | JoinUL | JoinUL            # only prefixes as one line
+        > 0..2 | JoinUL | SplitNL | JoinUL  # works on all lines
+    #>
+    $Input -split '\r?\n'
 }
