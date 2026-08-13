@@ -1,0 +1,16 @@
+---
+update: 2026-08-13
+title: fd find command
+about: the cli command `fd` find is a cross platform better find command. It's to the find command that `ripgrep` is to `grep` `
+---
+# regionBegin: important links
+links:
+  - name: 'source'
+    url: https://github.com/sharkdp/fd
+
+# regionBegin: inline examples
+snippets:
+  - name: 'install: fd'
+    desc: |
+        windows and linux install instructions
+    code: |

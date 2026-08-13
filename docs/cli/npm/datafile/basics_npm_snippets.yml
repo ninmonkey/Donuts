@@ -1,0 +1,17 @@
+---
+update: 2026-08-13
+title: 'npm cli command'
+about: node package manager
+---
+# regionBegin: important links
+links:
+  - name: 'source'
+    url: ''
+
+# regionBegin: inline examples
+snippets:
+  - name: 'install: npm'
+    desc: |
+        install on windows and linux
+    code: |
+        # ... code

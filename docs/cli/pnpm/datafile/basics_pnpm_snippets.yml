@@ -1,0 +1,17 @@
+---
+update: 2026-08-13
+title: 'pnpm cli command that wraps npm'
+about: a better version of the `npm` command
+---
+# regionBegin: important links
+links:
+  - name: 'source'
+    url: ''
+
+# regionBegin: inline examples
+snippets:
+  - name: 'install: pnpm'
+    desc: |
+        install on windows and linux
+    code: |
+        # ... code
