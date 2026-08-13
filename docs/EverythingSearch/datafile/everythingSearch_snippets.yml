@@ -2,7 +2,7 @@
 links:
   - name: 'docs: about'
     url: https://www.voidtools.com/support/everything/using_everything/
-    
+
   - name: "docs: what's new 1.5"
     url: https://www.voidtools.com/everything-1.5/#new
 
@@ -24,7 +24,7 @@ snippets:
     desc: |
         Enable colors. Group by depends on the current `sort:` function (and optionally `distinct:` )
     code: |
-        < ext:code-workspace dm:last10weeks > group-colors: 
+        < ext:code-workspace dm:last10weeks > group-colors:
   - name: 'GroupColors Example 2'
     desc: |
         You can use `distinct:` for **unique grouping** and `sort:` for order and `group-colors:`
@@ -34,13 +34,13 @@ snippets:
   - name: 'GroupColors Example 3'
     code: |
         < path:< !AppData !"c:\users"> > < ext:svg dm:last10weeks > group-colors:  < IgnorePrograms: > < IgnoreWindows: >
-    
+
   - name: 'GroupColors Example 4'
     desc: |
         Excludes folder named `AppData` and `c:\users`
         Filters by `*.svg` and `date-modified:last10weeks`
     code: |
-        < path:< !AppData !"c:\users"> > < ext:svg dm:last10weeks > group-colors:    
+        < path:< !AppData !"c:\users"> > < ext:svg dm:last10weeks > group-colors:
 
   - name: 'Recent: Code'
     desc: |
@@ -49,3 +49,12 @@ snippets:
         They must be one of the following file types: `ts`, `js`, `svg`, `md`, `html`, `code-workspace`
     code: |
         path:< c:\2025 | c:\2026 > < ext:ts;js;svg;md;html;code-workspace dm:last3months >
+
+  - name: 'Recently edited Pwsh files that contain specific text'
+    desc: |
+        Find `*.ps1` files
+        Only ones **modified in the last 4 days**
+        Only search the drives `c:\` and `d:\`
+        Only show files that contained the strings `log` or `parse` in the file contents
+    code: |
+        < dm:last4days ext:ps1 path:< c: | d: > > < content:log | content:parse >
