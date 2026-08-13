@@ -8,7 +8,7 @@ snippets:
   - name: 'Rebuild source and start serving'
     desc: |
         Go to the cloned directory
-        Rebuild the GitServe.psm1 with any changes to the source
+        Rebuild the GitServe.psm1 with any changes to the source ( Dotsources the build to return summary of files generated )
         -Force import changes
         Start serving on port 3001
     code: |
@@ -16,3 +16,28 @@ snippets:
         . .\Build\Build.Module.ps1;
         ipmo ./Gitserve -PassThru -Force -Verbose:$false;
         GitServe.Start -PSHost -Port 3001;
+
+        # in another terminal run this:f
+        # save and print list of all repos using a localhost web reqquest
+
+        ( $list_repos = irm 127.0.0.1:3001/repo/list ) | Ft -AutoSize
+
+  - name: 'Rebuild Import and run private functions without serving'
+    desc: |
+        Go to the cloned directory
+        Rebuild the GitServe.psm1 with any changes to the source ( Dotsources the build to return summary of files generated )
+        -Force import changes
+        Do not start serving
+        Invoke private module commands for testing
+
+    code: |
+        pushd 'C:\data\myGit\GitServed';
+        . .\Build\Build.Module.ps1;
+        ( $newModule = ipmo (Join-Path $prefix './Gitserve') -PassThru -Force -Verbose:$false )
+            | % ExportedCommands  | % Values | Ft -AutoSize;
+
+        # Save module so that you can invoke private functions for debugging:
+        # example: & ( $newModule ) { 'This command can invoke private functions to debug things' }
+
+        # or public module commands
+        GitServe.Invoke-RealGit -DryRun -FromPath '.' -ArgList 'log', '-n', '2'
