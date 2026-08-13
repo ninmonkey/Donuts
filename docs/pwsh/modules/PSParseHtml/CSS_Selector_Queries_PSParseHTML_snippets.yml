@@ -1,0 +1,22 @@
+# regionBegin: important links
+links:
+  - name: 'mdn: about CSS Selector Queries'
+    url: https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Selectors
+
+  - name: 'module PSParseHTML (also named: EvotecIT/HtmlTinkerX )'
+    url: https://github.com/EvotecIT/HtmlTinkerX
+
+# regionBegin: inline examples
+snippets:
+  - name: 'Rebuild source and start serving'
+    desc: |
+        Using CSS Selector Queries
+    code: |
+        Import-Module PSParseHTML -PassThru
+
+        [Uri] $url = 'https://xkcd.com/'
+
+        $html ??= Invoke-WebRequest -Uri $Url -UseBasicParsing
+        # AngleSharp uses CSS Selector queries rather than XPath :)
+        $doc  ??= ConvertFrom-Html -Content $html -Engine AngleSharp
+        $img = $doc.QuerySelector('#comic img')
