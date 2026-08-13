@@ -1,0 +1,61 @@
+# regionBegin: important links
+links:
+  - name: 'git log (manual)'
+    url: https://git-scm.com/docs/git-log#_examples
+
+# regionBegin: inline examples
+snippets:
+  - name: 'logs: single line'
+    desc: |
+        Show git logs in a single line format
+    code: |
+        git log --oneline
+
+        # or similar, but different
+        git log --pretty=oneline
+  - name: 'logs: single line since as relative dates: 2 hours ago'
+    desc: |
+        Uses relative dates with `--since` like:
+        - "2.hours"
+        - "2.months"
+
+    code: |
+        git log --oneline --since="2.hours"
+        git log --oneline --since="2.months"
+
+  - name: 'pull: pull multiple repos in parallel'
+    desc: |
+        This uses parallel so the invocation is a lot faster since it's not executed serially / as blocking
+        The speed difference when updating many repos can be significant
+    code: |
+        # set $RepoPaths = ...
+        $repoPaths | % -Parallel {
+            git.exe -C (Get-Item -ea 'stop' $_ ) pull 2>$null | Write-Output
+        }
+
+        # or use a command like
+        #   $RepoPaths = Mint.Find-GitRepo ...
+  - name: 'log: get first log for many repos'
+    desc: |
+        Many repos.
+        I am *not* using -Parallel here because that can actually make speed slower (verses other commands like fetch or clone)
+
+        `--no-pager` means even if git settings are set to use a pager for `log`, it will skip that
+        since you want the output
+
+        mine outputs the logs using ansi colors *by default*
+        This *might* require `$PSStyle.OutputRendering = 'host'` Or is from my git config.
+
+        Or you can opt-in with `--color=always` to force colors in a pipeline
+
+        `git.exe -C (gi -ea 'stop' '.') --no-pager log --oneline -n 1 --color=always`
+    code: |
+        # set $RepoPaths = ...
+        $repoPaths | % -Parallel {
+            git.exe -C (Get-Item -ea 'stop' $_ ) --no-pager log --oneline -n 1
+            # to force colors:
+            # git.exe -C (Get-Item -ea 'stop' $_ ) --no-pager log --oneline -n 1 --color=always
+        }
+
+        # or use a command like
+        #   $RepoPaths = Mint.Find-GitRepo ...
