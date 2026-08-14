@@ -185,6 +185,23 @@ function Invoke.NativeApp {
         Mintils\Mint.Invoke-AppWithConfirm
     .link
         Mintils\Mint.Invoke-App
+    .example
+        # Test what command would run, without actually running. Shows extra debug info:
+        Invoke.NativeApp ipconfig /all -DryRun
+
+        # Sometimes you need an explicit start in order to use the short syntax plus (Get-Item) inline
+        Invoke.NativeApp git -Args '-C', (gi .), status -DryRun
+    .example
+        # some expressions let you use a string without quotes or commas, like
+        Invoke.NativeApp ipconfig /?
+        Invoke.NativeApp ipconfig /all
+
+        # or even variables. The commas might not be needed here?
+        Invoke.NativeApp -AppName 'git' -ArgumentList log, -n, $t
+        otalNum, --format=oneline, --abbrev-commit, --color=always| echo
+    .example
+        # you can even force ansi colors when piping to echo, like
+        Invoke.NativeApp -AppName 'git' -ArgumentList log, -n, 3, --format=oneline, --abbrev-commit, --color=always | echo
     #>
     param(
         # Command or path
@@ -193,17 +210,29 @@ function Invoke.NativeApp {
         $AppName,
 
         # args for command
+        [Alias('BinArgs', 'ArgsList', 'CommandLineArgs')]
         [Parameter()]
         [object[]] $ArgumentList = @(),
 
         # Do not run command, just log what would have ran
         [Alias('WhatIf', 'TestOnly')]
         [Parameter()]
-        [switch] $DryRun
+        [switch] $DryRun,
+
+        # Even when running without DryRun, always prompt the user with yes/no confirmation
+        [Alias('Confirm')]
+        [switch] $RequiresConfirm,
+
+        # Do not echo the command line used from the command
+        [Alias('WithoutEcho')]
+        [switch] $WithoutPSHost
     )
     
     $maybeBin = Get-Command $AppName -CommandType Application -ErrorAction stop
     #optional: -totalCount 1 -UseAbbreviationExpansion:$false
+    $logArgsMessage = $ArgumentList | Join-String -sep ' ' | JoinPre "Invoke.NativeApp => ${AppName} "   
+
+    if( $RequiresConfirm ) { throw 'todo(NYI): add minimal ShouldProcess support' }
     if( $DryRun ) { 
         @(
             'Invoke.NativeApp: -DryRun'
@@ -211,8 +240,18 @@ function Invoke.NativeApp {
             $maybeBin.Source | JoinPre 'Path: ' | JoinIndent 1
             $ArgumentList | Join-String -sep ' ' | JoinPre "Cmd => ${AppName} " | JoinIndent 1
         ) | WriteInfo
+        return
+    } 
+    # write headers at the start, and end
+    if( -not $WithoutPSHost ) { 
+        $logArgsMessage | WriteInfo | Write-Host 
+        'nyi: write terminal scrollback point' | Write-Debug -Debug
     }
-
+    & $maybeBin @ArgumentList
+    if( -not $WithoutPSHost ) { 
+        $logArgsMessage | WriteInfo | Write-Host 
+        'nyi: write terminal scrollback point' | Write-Debug -Debug
+    }
 }
 
 #endregion utils for cli commands
@@ -221,9 +260,11 @@ function Invoke.NativeApp {
 function Find.GitRepo {
     param(
         [string] $BaseDirectory = '.'
-        )
-        fd '^\.git$' --base-directory (Get-Item -ea 'stop' $BaseDirectory) -HI --absolute-path | Split-Path | Get-Item
-    }
+    )
+    # Invoke.NativeApp -AppName 'fd' -ArgumentList @()
+    # Invoke.Nat
+    fd '^\.git$' --base-directory (Get-Item -ea 'stop' $BaseDirectory) -HI --absolute-path | Split-Path | Get-Item
+}
 #endregion utils for finding things
     
 #region utils unsorted misc
