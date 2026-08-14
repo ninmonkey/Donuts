@@ -1,6 +1,6 @@
 @{
     # Version number of this module.
-    ModuleVersion = '1.0.0'
+    ModuleVersion = '1.0.1'
     PrivateData      = @{
         PSData = @{
             # The prerelease portion of a semantic version. Blank for releases

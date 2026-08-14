@@ -10,6 +10,8 @@
     | WriteInfo -depth 0 -bg 'gray70'
 #>
 
+#region utils for text
+
 function JoinPre {
     <#
     .synopsis
@@ -169,3 +171,81 @@ function SplitNL {
     #>
     $Input -split '\r?\n'
 }
+
+#endregion utils for text
+
+#region utils for cli commands
+function Invoke.NativeApp {
+    <#
+    .synopsis
+        Invoke native CLI command and log the command ran
+    .description
+        See 'mintils' for more features. this is a simple, inline, no features version.
+    .link
+        Mintils\Mint.Invoke-AppWithConfirm
+    .link
+        Mintils\Mint.Invoke-App
+    #>
+    param(
+        # Command or path
+        [Alias('Command', 'Path', 'File', 'Exe')]
+        [Parameter(mandatory)]
+        $AppName,
+
+        # args for command
+        [Parameter()]
+        [object[]] $ArgumentList = @(),
+
+        # Do not run command, just log what would have ran
+        [Alias('WhatIf', 'TestOnly')]
+        [Parameter()]
+        [switch] $DryRun
+    )
+    
+    $maybeBin = Get-Command $AppName -CommandType Application -ErrorAction stop
+    #optional: -totalCount 1 -UseAbbreviationExpansion:$false
+    if( $DryRun ) { 
+        @(
+            'Invoke.NativeApp: -DryRun'
+            $AppName | JoinPre 'Name: ' | JoinIndent 1
+            $maybeBin.Source | JoinPre 'Path: ' | JoinIndent 1
+            $ArgumentList | Join-String -sep ' ' | JoinPre "Cmd => ${AppName} " | JoinIndent 1
+        ) | WriteInfo
+    }
+
+}
+
+#endregion utils for cli commands
+
+#region utils for finding things
+function Find.GitRepo {
+    param(
+        [string] $BaseDirectory = '.'
+        )
+        fd '^\.git$' --base-directory (Get-Item -ea 'stop' $BaseDirectory) -HI --absolute-path | Split-Path | Get-Item
+    }
+#endregion utils for finding things
+    
+#region utils unsorted misc
+function GetModule.Exports.Commands {
+    <#
+    .synopsis
+        Coerce and drill down (Get-Module) info to get the clean table of exported function commands
+    .example
+        # You can pipe a module instance or string
+        > Get-Module 'pansies' | GetModule.Exports.Commands
+        > 'pansies' | GetModule.Exports.Commands
+    .example
+        # Iterate directly from imports
+        > Import-Module 'ugit' -PassThru | GetModule.Exports.Commands
+    #> 
+    process {
+        $item = $_
+        [PSModuleInfo] $info = ( $item -is [PSModuleInfo] ) ? $item : ( get-module $item )
+        $info.ExportedCommands.Values    
+    }
+}
+
+
+
+#endregion utils unsorted misc
