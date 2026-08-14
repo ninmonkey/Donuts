@@ -225,32 +225,45 @@ function Invoke.NativeApp {
 
         # Do not echo the command line used from the command
         [Alias('WithoutEcho')]
-        [switch] $WithoutPSHost
-    )
-    
-    $maybeBin = Get-Command $AppName -CommandType Application -ErrorAction stop
-    #optional: -totalCount 1 -UseAbbreviationExpansion:$false
-    $logArgsMessage = $ArgumentList | Join-String -sep ' ' | JoinPre "Invoke.NativeApp => ${AppName} "   
+        [switch] $WithoutPSHost,
 
-    if( $RequiresConfirm ) { throw 'todo(NYI): add minimal ShouldProcess support' }
-    if( $DryRun ) { 
-        @(
-            'Invoke.NativeApp: -DryRun'
-            $AppName | JoinPre 'Name: ' | JoinIndent 1
-            $maybeBin.Source | JoinPre 'Path: ' | JoinIndent 1
-            $ArgumentList | Join-String -sep ' ' | JoinPre "Cmd => ${AppName} " | JoinIndent 1
-        ) | WriteInfo
-        return
-    } 
-    # write headers at the start, and end
-    if( -not $WithoutPSHost ) { 
-        $logArgsMessage | WriteInfo | Write-Host 
-        'nyi: write terminal scrollback point' | Write-Debug -Debug
+        [Parameter(ValueFromPipeline)]
+        [object[]] $InputObject
+    )
+
+    begin { 
+        [Collections.Generic.List[Object]] $InputItems = @()
     }
-    & $maybeBin @ArgumentList
-    if( -not $WithoutPSHost ) { 
-        $logArgsMessage | WriteInfo | Write-Host 
-        'nyi: write terminal scrollback point' | Write-Debug -Debug
+    process {
+        # if from pipeline add to list,
+        # otherwise if parameter only then add to list
+        write-warning 'nyi: param -InputObject'
+    }
+    end { 
+        $maybeBin = Get-Command $AppName -CommandType Application -ErrorAction stop
+        #optional: -totalCount 1 -UseAbbreviationExpansion:$false
+        $logArgsMessage = $ArgumentList | Join-String -sep ' ' | JoinPre "Invoke.NativeApp => ${AppName} "   
+    
+        if( $RequiresConfirm ) { throw 'todo(NYI): add minimal ShouldProcess support' }
+        if( $DryRun ) { 
+            @(
+                'Invoke.NativeApp: -DryRun'
+                $AppName | JoinPre 'Name: ' | JoinIndent 1
+                $maybeBin.Source | JoinPre 'Path: ' | JoinIndent 1
+                $ArgumentList | Join-String -sep ' ' | JoinPre "Cmd => ${AppName} " | JoinIndent 1
+            ) | WriteInfo
+            return
+        } 
+        # write headers at the start, and end
+        if( -not $WithoutPSHost ) { 
+            $logArgsMessage | WriteInfo | Write-Host 
+            'nyi: write terminal scrollback point' | Write-Debug -Debug
+        }
+        & $maybeBin @ArgumentList
+        if( -not $WithoutPSHost ) { 
+            $logArgsMessage | WriteInfo | Write-Host 
+            'nyi: write terminal scrollback point' | Write-Debug -Debug
+        }
     }
 }
 
@@ -261,9 +274,12 @@ function Find.GitRepo {
     param(
         [string] $BaseDirectory = '.'
     )
-    # Invoke.NativeApp -AppName 'fd' -ArgumentList @()
-    # Invoke.Nat
-    fd '^\.git$' --base-directory (Get-Item -ea 'stop' $BaseDirectory) -HI --absolute-path | Split-Path | Get-Item
+    Invoke.NativeApp -App 'fd' -Args @(
+        '^\.git$',
+        '--base-directory', (Get-Item -ea 'stop' $BaseDirectory),
+        '-HI', '--absolute-path'
+    ) | Split-Path | Get-Item
+    # was: fd '^\.git$' --base-directory (Get-Item -ea 'stop' $BaseDirectory) -HI --absolute-path | Split-Path | Get-Item
 }
 #endregion utils for finding things
     
