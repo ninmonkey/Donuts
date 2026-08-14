@@ -14,3 +14,16 @@ snippets:
     desc: |
         windows and linux install instructions
     code: |
+        # windows
+        winget install --id sharkdp.fd --exact
+
+        # linux
+        apt install fd-find
+
+  - name: 'fast find git repos (using fd-find)'
+    desc: |
+        Quickly find all git repositories under a specific directory.
+        Pipe to Get-Item if it's powershell
+    code: |
+        fd '^\.git$' --base-directory 'C:\GitRepos' -HI --absolute-path | Split-Path | Get-Item
+        
