@@ -6,5 +6,18 @@
 	],
 	"settings": {
 		"terminal.integrated.shellIntegration.enabled": false,
+
+		"[yaml]": {
+			"editor.insertSpaces": true,
+			"editor.tabSize": 2,
+			"editor.detectIndentation": true,
+			"prettier.tabWidth": 2,
+			// "editor.autoIndent": "advanced",
+			"diffEditor.ignoreTrimWhitespace": false,
+			// "editor.defaultColorDecorators": "never",
+			// "editor.quickSuggestions": {
+			// 	"strings": "on"
+			// }
+		}
 	}
 }
