@@ -281,6 +281,27 @@ function Find.GitRepo {
     ) | Split-Path | Get-Item
     # was: fd '^\.git$' --base-directory (Get-Item -ea 'stop' $BaseDirectory) -HI --absolute-path | Split-Path | Get-Item
 }
+function Find.Workspace {
+    <#
+    .synopsis
+        Find VsCode "*.code-workspace" files or directories that contain "/.vscode" folders 
+    .example
+        Find.Workspace
+        Find.Workspace -BaseDirectory '. ' -WithoutVsCodeFolders -MaxDepth 4
+    .link
+        Mintils\Mint.Find-CodeWorkspace
+    #>
+    param(
+        [string[]] $BaseDirectory = @('c:\2025','c:\2026'),
+        [switch] $WithoutVsCodeFolders,
+        [int]$MaxDepth = 4
+    )
+    foreach( $dir in $BaseDirectory ) {
+        if( -not (Test-Path $dir) ) { continue }
+        Mint.Find-CodeWorkspace -BaseDirectory $dir -MaxDepth $MaxDepth -IncludeVsCodeFolders:$( -not $WithoutVsCodeFolders )
+    }
+}
+
 #endregion utils for finding things
     
 #region utils unsorted misc
