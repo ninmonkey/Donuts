@@ -1,0 +1,14 @@
+{
+    "$help": "https://aka.ms/terminal-documentation",
+    "$schema": "https://aka.ms/terminal-profiles-schema-preview",
+    "actions": [
+        {
+            "command": {
+                "action": "wt",
+                "commandline": "--title \"GitServe\" pwsh.exe -NoExit -Command \"pushd 'C:\\data\\myGit\\GitServed'\\; . .\\Tests\\scripts\\debug_harness.ps1 -StartListener -Port 3001\" ; split-pane -V --title \"GitLoggerApp\" -d C:\\data\\2026-07\\web\\GitLoggerApp\\app-front pwsh.exe -NoExit -Command \"pnpm run dev\""
+            },
+            "id": "User.wt.C9558C8",
+            "name": "ninApp: \ud83e\udd8d GitServe plus UI (2026-07-26)"
+        },
+    ]
+}
