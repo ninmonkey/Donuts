@@ -7,8 +7,10 @@
   - [Inspect `$Enc` Properties](#inspect-enc-properties)
 - [Troubleshooting and tips](#troubleshooting-and-tips)
   - [Save your `*.ps1` as `UTF8WithBOM`](#save-your-ps1-as-utf8withbom)
+  - [Using `[char] $number` is not safe](#using-char-number-is-not-safe)
+- [I'm Lost](#im-lost)
   - [What encoding is `Unicode` ?](#what-encoding-is-unicode-)
-  - [What the heck is `Encoding` and `Decoding`](#what-the-heck-is-encoding-and-decoding)
+  - [What the heck is `Encoding` and `Decoding` ?](#what-the-heck-is-encoding-and-decoding-)
 - [Tangents](#tangents)
 
 # Visualize Encoding Errors
@@ -100,19 +102,44 @@ Encoding.Summary
 
 That enables `PowerShell.exe -File 'somefile.ps1'`
 
+## Using `[char] $number` is not safe
+
+That trick only works for numbers <= 0xffff 
+```powershell
+# error: Cannot convert "128018" to "Char". Value is too large
+$str = [char] 0x1f412 
+
+# but this works fine!
+$str = [char]::ConvertFromUtf32( 0x1f412 )
+```
+
+<!-- 
+$maxChar = [int] [char]::MaxValue
+[char] $maxChar          # okay, returns '￿'
+[char] ( $maxChar + 1 )  # Error 65536 is too large for [char] -->
+
+
+# I'm Lost
+
 ## What encoding is `Unicode` ? 
 
 > [!IMPORTANT]
 > In Powershell the term `Unicode` means `UTF-16LE` 
-## What the heck is `Encoding` and `Decoding`
+
+ex:
+- `Set-Content -Encoding Unicode`
+- `[System.Text.Encoding]::Unicode`
+
+
+## What the heck is `Encoding` and `Decoding` ?
 
 <!-- > However the defaults Powershell 5.1 make it a little harder to deal with than pwsh 7 or other languages. -->
 It's really just **specific rules to translating from format A to format B**.
 For text it's `strings` to `bytes` and then back.
 
 Think of encoding files like translating a book **to spanish**. Then **reading it as english**, *without translating* it. 
-- Some words are exactly the same like "no" and "club"
-- Lots of words are partially broken or out of order
+- Some words are the exact same for both like "no" and "club"
+- Lots of words are out of order or totally different / broken 
 
 # Tangents
 
