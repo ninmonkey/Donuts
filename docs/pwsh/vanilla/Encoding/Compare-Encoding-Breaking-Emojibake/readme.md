@@ -4,8 +4,11 @@
   - [Direct mode](#direct-mode)
   - [Start from a String](#start-from-a-string)
   - [Start from `Byte[]`s array](#start-from-bytes-array)
+  - [Inspect `$Enc` Properties](#inspect-enc-properties)
 - [Troubleshooting and tips](#troubleshooting-and-tips)
-  - [Save `UTF8` as `UTF8WithBOM`](#save-utf8-as-utf8withbom)
+  - [Save your `*.ps1` as `UTF8WithBOM`](#save-your-ps1-as-utf8withbom)
+  - [What encoding is `Unicode` ?](#what-encoding-is-unicode-)
+  - [What the heck is `Encoding` and `Decoding`](#what-the-heck-is-encoding-and-decoding)
 - [Tangents](#tangents)
 
 # Visualize Encoding Errors
@@ -17,9 +20,10 @@
 
 # Examples
 
+*Dotsource it*
+
 ## Direct mode
 
-*Dotsource it*
 
 ```powershell
 . ./Compare-Encode-Decode-Errors-On-PowerShell-5.1.ps1
@@ -33,36 +37,22 @@ $enc.Utf8.GetBytes( '🐒' ) | ShowHex
 
 ![screenshot-single-test](img/Screenshot.CompareEncoding-Manual-Testing.png)
 
-To inspect `$Enc` names
-```powershell
-Encoding.Summary
-```
-
-| HashKey  | BodyName    | EncodingName               | HeaderName   | WebName      | WindowsCodePage | CodePage |
-| -------- | ----------- | -------------------------- | ------------ | ------------ | --------------- | -------- |
-| ShiftJis | iso-2022-jp | Japanese (Shift-JIS)       | iso-2022-jp  | shift_jis    | 932             | 932      |
-| Utf8     | utf-8       | Unicode (UTF-8)            | utf-8        | utf-8        | 1200            | 65001    |
-| Utf16le  | utf-16      | Unicode                    | utf-16       | utf-16       | 1200            | 1200     |
-| Default5 | iso-8859-1  | Western European (Windows) | Windows-1252 | Windows-1252 | 1252            | 1252     |
-
-
 ## Start from a String
 
-Take the string `'ファイルが見つかりません'` and compare
+Start with the string `'ファイルが見つかりません'` and try
 
-- encode: as `ShiftJis` then decode as `ShiftJis` ( Works )
-- encode: as `ShiftJis` then decode as `Utf8` ( Breaks )
-
-----
-
+1. enc `ShiftJis` then dec as `ShiftJis` - **Good**
+2. enc `ShiftJis` then dec as `Utf8` - **Fails**
 
 ```powershell
 $Text = 'ファイルが見つかりません'
 # good -> enc ShiftJis -> dec ShiftJis -> good
-# good -> enc ShiftJis -> dec Utf8     -> bad
 CompareEncDec.FromString -EncodeAs $Enc.ShiftJis -DecodeAs $Enc.ShiftJis -FromString $Text 
+
+# good -> enc ShiftJis -> dec Utf8     -> bad
 CompareEncDec.FromString -EncodeAs $Enc.ShiftJis -DecodeAs $Enc.Utf8     -FromString $Text 
 ```
+
 <!-- ( $HexString = $Enc.Utf8.GetBytes(  '🐒' )  | ShowHex ) 
 $curBytes = Bytes.FromHexStr $HexString
 CompareEncDec.FromByte -Bytes $ExpectBytes_Encoded_ShiftJis -DecodeAs $enc.Utf8 -EncodeAs $enc.Utf8 -->
@@ -80,30 +70,66 @@ $curBytes = Bytes.FromHexStr $HexString
 
 # good -> dec utf8 -> enc utf8 -> good
 # good -> dec ut16le -> enc utf8 -> bad
-CompareEncDec.FromByte -Bytes $curBytes -DecodeAs $enc.Utf8 -EncodeAs $enc.Utf8
+CompareEncDec.FromByte -Bytes $curBytes -DecodeAs $enc.Utf8    -EncodeAs $enc.Utf8
 CompareEncDec.FromByte -Bytes $curBytes -DecodeAs $enc.Utf16le -EncodeAs $enc.Utf8
 ```
 
+## Inspect `$Enc` Properties
+
+```powershell
+Encoding.Summary
+```
+
+| HashKey  | BodyName    | EncodingName               | HeaderName   | WebName      | WindowsCodePage | CodePage |
+| -------- | ----------- | -------------------------- | ------------ | ------------ | --------------- | -------- |
+| ShiftJis | iso-2022-jp | Japanese (Shift-JIS)       | iso-2022-jp  | shift_jis    | 932             | 932      |
+| Utf8     | utf-8       | Unicode (UTF-8)            | utf-8        | utf-8        | 1200            | 65001    |
+| Utf16le  | utf-16      | Unicode                    | utf-16       | utf-16       | 1200            | 1200     |
+| Default5 | iso-8859-1  | Western European (Windows) | Windows-1252 | Windows-1252 | 1252            | 1252     |
+
+
 # Troubleshooting and tips
 
-## Save `UTF8` as `UTF8WithBOM`
+> [!NOTE]
+>  Encoding occur when **mixing** the wrong `encodings`. This can occur in any language.
+
+## Save your `*.ps1` as `UTF8WithBOM`
 
 > [!IMPORTANT]
 > If you copy the code, make sure you save the file as `UTF8WithBOM` . Then `PowerShell.exe` will automatically support `utf-8` string literals in the source file itself ( In `Powershell 5.1` )
 
 That enables `PowerShell.exe -File 'somefile.ps1'`
 
-> [!NOTE]
-> Encoding occur when **mixing** the wrong `encodings`. This can occur in any language.
-> However the defaults Powershell 5.1 make it a little harder to deal with than pwsh 7 or other languages.
+## What encoding is `Unicode` ? 
+
+> [!IMPORTANT]
+> In Powershell the term `Unicode` means `UTF-16LE` 
+## What the heck is `Encoding` and `Decoding`
+
+<!-- > However the defaults Powershell 5.1 make it a little harder to deal with than pwsh 7 or other languages. -->
+It's really just **specific rules to translating from format A to format B**.
+For text it's `strings` to `bytes` and then back.
 
 Think of encoding files like translating a book **to spanish**. Then **reading it as english**, *without translating* it. 
 - Some words are exactly the same like "no" and "club"
 - Lots of words are partially broken or out of order
 
-
-
 # Tangents
+
+Sometimes you encode `strings` to `strings` !
+
+- Before - `https://www.google.com/?foo=🐒+bananas`                          
+- After -  `https%3a%2f%2fwww.google.com%2f%3ffoo%3d%f0%9f%90%92%2bbananas` 
+
+```powershell
+Add-Type -AssemblyName 'System.Web' 
+$urlEnc = [System.Web.HttpUtility]::UrlEncode( 'https://www.google.com/?foo=🐒+bananas' )
+# out: https%3a%2f%2fwww.google.com%2f%3ffoo%3d%f0%9f%90%92%2bbananas
+
+$urlDec = [System.Web.HttpUtility]::UrlDecode( $urlEnc )
+# out: https://www.google.com/?foo=🐒+bananas
+```
+
 <details><summary><small>If you like Tangents... 🦝</small>
 
 </summary>
