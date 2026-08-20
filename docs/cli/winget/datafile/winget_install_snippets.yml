@@ -1,0 +1,43 @@
+---
+update: 2026-08-18
+title: winget package manager
+about: the cli command `winget` is the windows package manager
+---
+# regionBegin: important links
+links:
+  - name: 'winget flags: install'
+    url: https://learn.microsoft.com/en-us/windows/package-manager/winget/install
+
+# regionBegin: inline examples
+snippets:
+  - name: 'enable extra logs'
+    desc: |
+      Enable extra logging for all winget commands.
+    code: |
+      winget --verbose-logs
+  - name: 'change log location'
+    desc: |
+      Create a logfile for this run
+    code: |
+      winget --verbose-logs --log 'filename.log'
+  - name: 'logs: find all logs'
+    desc: |
+      winget commands
+    code: |
+      Join-Path $Env:LocalAppData 'Packages/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe/LocalState/DiagOutputDir/*.log' | Get-Item
+  - name: 'run winget with a custom safe filename'
+    desc: |
+      Run winget with a custom safe filename for the log.
+      - it does not collide with the default log files
+      - it uses datetime and PID to be specific, ex: `winget-install-pid_16400-2026-08-18_17-46-00Z.log`
+
+    code: |
+      function NewSafeWingetName {
+          param(
+              $template = "winget-install-pid_${pid}-{0}.log",
+              $dateFormat = 'u'
+          )
+          # I'm sure there's a cleaner fstr, without replace
+          $dateStr = [datetime]::Now.ToString( $dateFormat ) -replace '[ ]+', '_' -replace ':', '-'
+          $template -f $dateStr
+      }
