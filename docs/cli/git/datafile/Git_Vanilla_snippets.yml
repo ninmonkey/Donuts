@@ -66,3 +66,23 @@ snippets:
 
         # or use a command like
         #   $RepoPaths = Mint.Find-GitRepo ...
+
+  - name: 'fetch: comparing merge rather than git pull'
+    desc: |
+        'dsf'
+    code: |
+      git fetch -v
+
+      # Example: view new commit messages, with branch
+      git --no-pager log HEAD..origin/main --oneline
+      # Example: view new commit messages
+      git --no-pager log HEAD..origin --oneline
+
+      # Example: git diff of changes
+      git diff HEAD..origin/main
+
+      # Example: same, without pager
+      git --no-pager diff HEAD..origin/main
+
+      # Example: If good, merge it
+      git merge origin/main -v
