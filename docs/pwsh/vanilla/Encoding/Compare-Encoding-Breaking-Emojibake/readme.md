@@ -13,10 +13,12 @@
   - [What the heck is `Encoding` and `Decoding` ?](#what-the-heck-is-encoding-and-decoding-)
 - [Tangents](#tangents)
 
+> [!TIP]
+> For the [best comparison of console input/output encoding console encoding across Powershell v `5.0` vs `5.1` vs `7` checkout `mklement0`'s stack overflow post](https://stackoverflow.com/questions/40098771/changing-powershells-default-output-encoding-to-utf-8/40098904#40098904)
+
 # Visualize Encoding Errors
 
 <small>Grab the script: [Compare-Encode-Decode-Errors-on-Powershell-5.1.ps1](Compare-Encode-Decode-Errors-On-PowerShell-5.1.ps1)</small>
-
 
 ![screenshot-test-many](img/Screenshot.CompareEncoding-Many-Powershell-5.1.png)
 
@@ -25,7 +27,6 @@
 *Dotsource it*
 
 ## Direct mode
-
 
 ```powershell
 . ./Compare-Encode-Decode-Errors-On-PowerShell-5.1.ps1
@@ -84,10 +85,10 @@ Encoding.Summary
 
 | HashKey  | BodyName    | EncodingName               | HeaderName   | WebName      | WindowsCodePage | CodePage |
 | -------- | ----------- | -------------------------- | ------------ | ------------ | --------------- | -------- |
+| Default5 | iso-8859-1  | Western European (Windows) | Windows-1252 | Windows-1252 | 1252            | 1252     |
 | ShiftJis | iso-2022-jp | Japanese (Shift-JIS)       | iso-2022-jp  | shift_jis    | 932             | 932      |
 | Utf8     | utf-8       | Unicode (UTF-8)            | utf-8        | utf-8        | 1200            | 65001    |
 | Utf16le  | utf-16      | Unicode                    | utf-16       | utf-16       | 1200            | 1200     |
-| Default5 | iso-8859-1  | Western European (Windows) | Windows-1252 | Windows-1252 | 1252            | 1252     |
 
 
 # Troubleshooting and tips
