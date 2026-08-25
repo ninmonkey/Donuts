@@ -1,4 +1,5 @@
 
+- [Detecting with `Test-ShiftJISDecodeError`](#detecting-with-test-shiftjisdecodeerror)
 - [Visualize Encoding Errors](#visualize-encoding-errors)
 - [Examples](#examples)
   - [Direct mode](#direct-mode)
@@ -15,6 +16,10 @@
 
 > [!TIP]
 > For the [best comparison of console input/output encoding console encoding across Powershell v `5.0` vs `5.1` vs `7` checkout `mklement0`'s stack overflow post](https://stackoverflow.com/questions/40098771/changing-powershells-default-output-encoding-to-utf-8/40098904#40098904)
+
+# Detecting with `Test-ShiftJISDecodeError`
+
+You can try [Test-ShiftJISDecodeError](Make-ShiftJISFile.ps1). If there's at least one decoding error, you'll know.
 
 # Visualize Encoding Errors
 
