@@ -316,6 +316,47 @@ function Invoke.Zoxide.PickAddPath {
 
 #endregion utils for cli commands
 
+#region utils for picking things
+
+function Pick.One {
+    <#
+    .SYNOPSIS
+    Pick strings, then save to $PicKOne and $PickSome
+    .EXAMPLE
+        Get-Culture -ListAvailable | % Name | Pick.Some
+    .LINK
+        Pick.One
+    .LINK
+        Pick.Some
+    #>
+    param()
+    $global:PickOne = 
+        $Input 
+        | Sort-Object -unique
+        | & ( Get.NativeApp fzf )
+}
+function Pick.Some {
+    <#
+    .SYNOPSIS
+    Pick strings, then save to $PicKOne and $PickSome
+    .EXAMPLE
+        Get-Culture -ListAvailable | % Name | Pick.Some
+    .LINK
+        Pick.One
+    .LINK
+        Pick.Some
+    #>
+    param(
+        [int] $Count = 5
+    )
+    $global:PickSome = 
+        $Input 
+        | Sort-Object -unique
+        | & ( Get.NativeApp fzf ) -m
+}
+#endregion utils for picking things
+
+
 #region utils for finding things
 function Find.GitRepo {
     param(
