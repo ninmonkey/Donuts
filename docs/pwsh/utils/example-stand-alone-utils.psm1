@@ -334,6 +334,8 @@ function Pick.One {
         $Input 
         | Sort-Object -unique
         | & ( Get.NativeApp fzf )
+
+    return $global:PickOne
 }
 function Pick.Some {
     <#
@@ -353,6 +355,8 @@ function Pick.Some {
         $Input 
         | Sort-Object -unique
         | & ( Get.NativeApp fzf ) -m
+
+    return $global:PickSome
 }
 #endregion utils for picking things
 
