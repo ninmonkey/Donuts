@@ -10,6 +10,15 @@
     | WriteInfo -depth 0 -bg 'gray70'
 #>
 
+#region Environment Variables
+
+# fzf
+$ENV:FZF_DEFAULT_OPTS = '-m --layout=reverse --cycle --info inline'
+# $ENV:FZF_DEFAULT_COMMAND = 'fd --type f --hidden --follow --exclude .git'
+
+#region Environment Variables
+
+
 #region utils for text
 
 function JoinPre {
@@ -265,6 +274,44 @@ function Invoke.NativeApp {
             'nyi: write terminal scrollback point' | Write-Debug -Debug
         }
     }
+}
+
+function Get.NativeApp { 
+    <#
+    .synopsis
+        Get and return a native command without executing
+    .EXAMPLE
+        $bin = Get.NativeApp fzf; 0..3 | & $bin -m
+        0..3 | & ( Get.NativeApp fzf ) -m
+    .link
+        Invoke.NativeApp
+    #>
+    param ( 
+        [Alias('Name', 'Command')]
+        [string] $Path
+    )
+    $app = gcm $Path -CommandType Application -ErrorAction stop -TotalCount 1
+    $app
+}
+function Invoke.Zoxide.PickAddPath {
+    <#
+    .synopsis
+        Pick a path from fzf and add it to zoxide
+    .description
+        shorthand for: $paths | fzf -m | %{ zoxide add $_ }  
+    .link
+        Invoke.NativeApp
+    #>
+    param()
+
+    $fzf = Get.NativeApp 'fzf'
+    $zoxide = Get.NativeApp 'zoxide'
+
+    $Input 
+        | & $fzf -m
+        | %{ 
+            & $zoxide add $_
+        } 
 }
 
 #endregion utils for cli commands
