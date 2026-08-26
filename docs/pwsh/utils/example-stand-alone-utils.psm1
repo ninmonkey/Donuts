@@ -358,6 +358,35 @@ function Pick.Some {
 
     return $global:PickSome
 }
+
+function Save.Var {
+    <#
+    .SYNOPSIS
+        Pipe to it to save variable to the global/user scope
+    .EXAMPLE
+        Get-Culture -ListAvailable | sort | Save.Var Cults
+        Get-ChildItem . -Recurse | Save.Var 'DirMain'
+        # output: created vars $Cults and $DirMain
+    .EXAMPLE
+        'a'..'z' | Save.Var
+        # output: SavedVar: $SaveVar as Object[] ( count: 26 ) first child type: Char
+        $SaveVar.count
+        # output: 26
+    #>
+    param(
+        [Alias('Var', 'Name')]
+        [string] $VariableName = 'SaveVar'
+    )
+    $result = @( $Input )
+    Set-Variable -Scope Global -Name $VariableName -Value $result
+    
+    $typeName = ( $result )?.GetType().Name ?? '<null>'
+    $countStr = $result.count -eq 0 ? '' : " ( count: $( $result.count ) )"
+    $firstChild = @( $result )[0]
+    $childStr = -not $firstChild ? '' : " first child type: $( ( $firstChild )?.GetType().Name )"
+    "SavedVar: `$${VariableName} as ${typeName}${countStr}${childStr}"
+    | WriteInfo 
+}
 #endregion utils for picking things
 
 
