@@ -25,7 +25,9 @@ final output:
 #>
 
 function New-TrackUrl {
-    param([uri]$uri, [string]$title)
+    # added type conversion which auto enables passing Get-Item without param binding errors
+        # original: param([uri]$uri, [string]$title)
+    param( [uri] [string] $uri, [string]$title)
     if (!$title) {
         $title = $uri.ToString()
     }
