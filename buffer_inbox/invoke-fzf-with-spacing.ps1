@@ -1,4 +1,26 @@
-﻿# [8] emit data ID without showing it to the user
+﻿# [11] rendering longer than screen lines
+$Delim = "`u{2400}"
+$renderProc ??= $proc | Select -First 40 | %{ $_ | Join-string -p { $_.Id, $_.Name, $_.CommandLine } -sep $Delim }
+$longRender = $renderProc | Sort -Property Length -Descending -Top 4
+$longRender
+| fzf -m
+
+# [10] of transformed list, search nth element
+$Delim = "`u{2400}"
+$renderProc ??= $proc | Select -First 40 | %{ $_ | Join-string -p { $_.Id, $_.Name, $_.CommandLine } -sep $Delim }
+$longRender = $renderProc | Sort -Property Length -Descending -Top 4
+$renderProc | fzf -m  '--with-nth=2,1' <# display: Name, Pid #> --nth=1  <# of them, search 1st #>
+
+
+# [9] Select fields out-of order, and drop some
+# input fields[3] : Id, Name, CommandLine
+$Delim = "`u{2400}"
+$renderProc ??= $proc | Select -First 40 | %{ $_ | Join-string -p { $_.Id, $_.Name, $_.CommandLine } -sep $Delim }
+$renderProc | fzf -m  '--with-nth=2,1' # display: Name, Pid
+$renderProc | fzf -m  '--with-nth=1,2' # display: Pid, Name
+
+
+# [8] emit data ID without showing it to the user
 $Delim = "; "
 $strs = get-culture -ListAvailable | %{ $_.Name, $_.DisplayName -join $delim }
 $res = $strs | fzf -m "--delimiter=${delim}" --with-nth=2 <# search by english #>
