@@ -4,6 +4,8 @@ function Measure-ProcessMemory {
     <#
     .synopsis
         Get Process memory usage
+    .link
+        https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process?view=net-10.0#properties
     #>
     param(
         # exact process name
