@@ -10,6 +10,15 @@
     | WriteInfo -depth 0 -bg 'gray70'
 #>
 
+#region Environment Variables
+
+# fzf
+$ENV:FZF_DEFAULT_OPTS = '-m --layout=reverse --cycle --info inline'
+# $ENV:FZF_DEFAULT_COMMAND = 'fd --type f --hidden --follow --exclude .git'
+
+#region Environment Variables
+
+
 #region utils for text
 
 function JoinPre {
@@ -267,7 +276,119 @@ function Invoke.NativeApp {
     }
 }
 
+function Get.NativeApp { 
+    <#
+    .synopsis
+        Get and return a native command without executing
+    .EXAMPLE
+        $bin = Get.NativeApp fzf; 0..3 | & $bin -m
+        0..3 | & ( Get.NativeApp fzf ) -m
+    .link
+        Invoke.NativeApp
+    #>
+    param ( 
+        [Alias('Name', 'Command')]
+        [string] $Path
+    )
+    $app = gcm $Path -CommandType Application -ErrorAction stop -TotalCount 1
+    $app
+}
+function Invoke.Zoxide.PickAddPath {
+    <#
+    .synopsis
+        Pick a path from fzf and add it to zoxide
+    .description
+        shorthand for: $paths | fzf -m | %{ zoxide add $_ }  
+    .link
+        Invoke.NativeApp
+    #>
+    param()
+
+    $fzf = Get.NativeApp 'fzf'
+    $zoxide = Get.NativeApp 'zoxide'
+
+    $Input 
+        | & $fzf -m
+        | %{ 
+            & $zoxide add $_
+        } 
+}
+
 #endregion utils for cli commands
+
+#region utils for picking things
+
+function Pick.One {
+    <#
+    .SYNOPSIS
+    Pick strings, then save to $PicKOne and $PickSome
+    .EXAMPLE
+        Get-Culture -ListAvailable | % Name | Pick.Some
+    .LINK
+        Pick.One
+    .LINK
+        Pick.Some
+    #>
+    param()
+    $global:PickOne = 
+        $Input 
+        | Sort-Object -unique
+        | & ( Get.NativeApp fzf )
+
+    return $global:PickOne
+}
+function Pick.Some {
+    <#
+    .SYNOPSIS
+    Pick strings, then save to $PicKOne and $PickSome
+    .EXAMPLE
+        Get-Culture -ListAvailable | % Name | Pick.Some
+    .LINK
+        Pick.One
+    .LINK
+        Pick.Some
+    #>
+    param(
+        [int] $Count = 5
+    )
+    $global:PickSome = 
+        $Input 
+        | Sort-Object -unique
+        | & ( Get.NativeApp fzf ) -m
+
+    return $global:PickSome
+}
+
+function Save.Var {
+    <#
+    .SYNOPSIS
+        Pipe to it to save variable to the global/user scope
+    .EXAMPLE
+        Get-Culture -ListAvailable | sort | Save.Var Cults
+        Get-ChildItem . -Recurse | Save.Var 'DirMain'
+        # output: created vars $Cults and $DirMain
+    .EXAMPLE
+        'a'..'z' | Save.Var
+        # output: SavedVar: $SaveVar as Object[] ( count: 26 ) first child type: Char
+        $SaveVar.count
+        # output: 26
+    #>
+    param(
+        [Alias('Var', 'Name')]
+        [string] $VariableName = 'SaveVar'
+    )
+    $result = @( $Input )
+    Set-Variable -Scope Global -Name $VariableName -Value $result
+    
+    $typeName = ( $result )?.GetType().Name ?? '<null>'
+    $countStr = $result.count -eq 0 ? '' : " ( count: $( $result.count ) )"
+    $firstChild = @( $result )[0]
+    $childStr = -not $firstChild ? '' : " first child type: $( ( $firstChild )?.GetType().Name )"
+    "SavedVar: `$${VariableName} as ${typeName}${countStr}${childStr}"
+    | WriteInfo 
+}
+#endregion utils for picking things
+
 
 #region utils for finding things
 function Find.GitRepo {
