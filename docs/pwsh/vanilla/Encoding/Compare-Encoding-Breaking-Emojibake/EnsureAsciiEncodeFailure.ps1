@@ -29,7 +29,16 @@ $Example = @{
 
 
 # [b] expect errors
-$bytes = $Enc.AsciiStrict.GetBytes( $Example.JsonLiteral )
-[System.IO.File]::WriteAllBytes(
-    ( Join-Path $OutRoot 'expect_errors.txt' ),
-    $bytes )
+function Test-AsciiEncodeError {
+    param( [string] $Text )
+    try {
+        $bytes = $Enc.AsciiStrict.GetBytes( $Text )
+
+        [System.IO.File]::WriteAllBytes(
+            ( Join-Path $OutRoot 'expect_errors.txt' ),
+            $bytes )
+        return $false
+    } catch {
+        return $true
+    }
+}
