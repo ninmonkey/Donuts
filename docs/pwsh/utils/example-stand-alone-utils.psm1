@@ -240,7 +240,7 @@ function Invoke.NativeApp {
         [object[]] $InputObject
     )
 
-    begin { 
+    begin {
         [Collections.Generic.List[Object]] $InputItems = @()
     }
     process {
@@ -248,13 +248,13 @@ function Invoke.NativeApp {
         # otherwise if parameter only then add to list
         write-warning 'nyi: param -InputObject'
     }
-    end { 
+    end {
         $maybeBin = Get-Command $AppName -CommandType Application -ErrorAction stop
         #optional: -totalCount 1 -UseAbbreviationExpansion:$false
-        $logArgsMessage = $ArgumentList | Join-String -sep ' ' | JoinPre "Invoke.NativeApp => ${AppName} "   
-    
+        $logArgsMessage = $ArgumentList | Join-String -sep ' ' | JoinPre "Invoke.NativeApp => ${AppName} "
+
         if( $RequiresConfirm ) { throw 'todo(NYI): add minimal ShouldProcess support' }
-        if( $DryRun ) { 
+        if( $DryRun ) {
             @(
                 'Invoke.NativeApp: -DryRun'
                 $AppName | JoinPre 'Name: ' | JoinIndent 1
@@ -262,21 +262,21 @@ function Invoke.NativeApp {
                 $ArgumentList | Join-String -sep ' ' | JoinPre "Cmd => ${AppName} " | JoinIndent 1
             ) | WriteInfo
             return
-        } 
+        }
         # write headers at the start, and end
-        if( -not $WithoutPSHost ) { 
-            $logArgsMessage | WriteInfo | Write-Host 
+        if( -not $WithoutPSHost ) {
+            $logArgsMessage | WriteInfo | Write-Host
             'nyi: write terminal scrollback point' | Write-Debug -Debug
         }
         & $maybeBin @ArgumentList
-        if( -not $WithoutPSHost ) { 
-            $logArgsMessage | WriteInfo | Write-Host 
+        if( -not $WithoutPSHost ) {
+            $logArgsMessage | WriteInfo | Write-Host
             'nyi: write terminal scrollback point' | Write-Debug -Debug
         }
     }
 }
 
-function Get.NativeApp { 
+function Get.NativeApp {
     <#
     .synopsis
         Get and return a native command without executing
@@ -286,7 +286,7 @@ function Get.NativeApp {
     .link
         Invoke.NativeApp
     #>
-    param ( 
+    param (
         [Alias('Name', 'Command')]
         [string] $Path
     )
@@ -298,7 +298,7 @@ function Invoke.Zoxide.PickAddPath {
     .synopsis
         Pick a path from fzf and add it to zoxide
     .description
-        shorthand for: $paths | fzf -m | %{ zoxide add $_ }  
+        shorthand for: $paths | fzf -m | %{ zoxide add $_ }
     .link
         Invoke.NativeApp
     #>
@@ -307,11 +307,11 @@ function Invoke.Zoxide.PickAddPath {
     $fzf = Get.NativeApp 'fzf'
     $zoxide = Get.NativeApp 'zoxide'
 
-    $Input 
+    $Input
         | & $fzf -m
-        | %{ 
+        | %{
             & $zoxide add $_
-        } 
+        }
 }
 
 #endregion utils for cli commands
@@ -330,8 +330,8 @@ function Pick.One {
         Pick.Some
     #>
     param()
-    $global:PickOne = 
-        $Input 
+    $global:PickOne =
+        $Input
         | Sort-Object -unique
         | & ( Get.NativeApp fzf )
 
@@ -351,8 +351,8 @@ function Pick.Some {
     param(
         [int] $Count = 5
     )
-    $global:PickSome = 
-        $Input 
+    $global:PickSome =
+        $Input
         | Sort-Object -unique
         | & ( Get.NativeApp fzf ) -m
 
@@ -379,13 +379,13 @@ function Save.Var {
     )
     $result = @( $Input )
     Set-Variable -Scope Global -Name $VariableName -Value $result
-    
+
     $typeName = ( $result )?.GetType().Name ?? '<null>'
     $countStr = $result.count -eq 0 ? '' : " ( count: $( $result.count ) )"
     $firstChild = @( $result )[0]
     $childStr = -not $firstChild ? '' : " first child type: $( ( $firstChild )?.GetType().Name )"
     "SavedVar: `$${VariableName} as ${typeName}${countStr}${childStr}"
-    | WriteInfo 
+    | WriteInfo
 }
 #endregion utils for picking things
 
@@ -405,7 +405,7 @@ function Find.GitRepo {
 function Find.Workspace {
     <#
     .synopsis
-        Find VsCode "*.code-workspace" files or directories that contain "/.vscode" folders 
+        Find VsCode "*.code-workspace" files or directories that contain "/.vscode" folders
     .example
         Find.Workspace
         Find.Workspace -BaseDirectory '. ' -WithoutVsCodeFolders -MaxDepth 4
@@ -424,7 +424,7 @@ function Find.Workspace {
 }
 
 #endregion utils for finding things
-    
+
 #region utils unsorted misc
 function GetModule.Exports.Commands {
     <#
@@ -437,14 +437,109 @@ function GetModule.Exports.Commands {
     .example
         # Iterate directly from imports
         > Import-Module 'ugit' -PassThru | GetModule.Exports.Commands
-    #> 
+    #>
     process {
         $item = $_
         [PSModuleInfo] $info = ( $item -is [PSModuleInfo] ) ? $item : ( get-module $item )
-        $info.ExportedCommands.Values    
+        $info.ExportedCommands.Values
     }
 }
 
-
-
 #endregion utils unsorted misc
+
+#region folders and path utils
+
+function NewDir.By {
+    <#
+    .SYNOPSIS
+    create folders using templates, and enter them
+    #>
+    [CmdletBinding(SupportsShouldProcess,ConfirmImpact='High')]
+    param(
+        [ArgumentCompletions(
+            'DateOnly', 'YearMonth', 'YearMonthDay', 'DateIso'
+        )]
+        [string] $TemplateName,
+
+        # date if not now
+        [datetime] $FromDate,
+
+        # date culture
+        [CultureInfo] $Culture = [cultureinfo]::InvariantCulture,
+
+        # mkdir -force
+        [switch] $Force
+    )
+    $fromDate ??= Get-Date
+    $newName = switch ( $TemplateName ) {
+        { $_ -in 'DateOnly', 'YearMonthDay' } {
+            $fromDate.ToString('yyyy-MM-dd', $Culture )
+        }
+        'YearMonth' {
+            $fromDate.ToString('yyyy-MM', $Culture )
+        }
+        'DateIso' {
+            $DateIsoFstr = "yyyy-MM-dd HH:mm:ss zzz"
+            $fromDate.ToString( $DateIsoFstr, $Culture )
+        }
+        default { Throw "UnhandledTemplateName: $TemplateName"}
+    }
+    if( Test-Path $newName ) {
+        $newName | Get-Item
+            | Join-String Name -op 'Enter existing dir: '
+            | New-Text -fg '#ebecf0' -bg '#4d4d4d'
+            | Write-Host
+        pushd $newName
+        gci . | Sort LastWriteTime
+        return
+    }
+
+    $item = New-Item -ItemType Directory -Path $newName  -WhatIf:$WhatIfPreference -Force:$Force
+    pushd $Item
+
+    $newName | Get-Item
+            | Join-String Name -op 'Enter new dir: '
+            | New-Text -fg '#ebecf0' -bg '#4d4d4d'
+            | Write-Host
+
+    'Enter new dir...'
+        | New-Text -fg '#ebecf0' -bg '#4d4d4d'
+        | Write-Host
+}
+
+
+function GetRecentItems {
+    <#
+    .synopsis
+        show recent files, and folders in a path
+    .EXAMPLE
+        GetRecentItems
+    .EXAMPLE
+        GetRecentItems 'c:\'
+        GetRecentItems 'c:\' -DaysSince 4
+    #>
+    param(
+        [Parameter(Position = 0 )]
+        [string] $Path = '.',
+
+        [int] $DaysSince = 30
+
+        # [Alias('Date', 'Now')]
+        # [datetime] $compareDate
+    )
+    $compareDate ??= [Datetime]::now
+    $base = Get-Item $Path
+    if( -not $Base ) { return }
+
+    # recent dirs, recent files
+    gci $Base -Directory | sort-object LastWriteTime
+        | ?{ ($compareDate).AddDays( - $DaysSince ) -le $_.LastWriteTime }
+        | Join-String Name -f '{0}/' -sep  ' ' -op 'RecentDirs : '
+
+    gci $Base -File | sort-object LastWriteTime
+        | ?{ ($compareDate).AddDays( - $DaysSince ) -le $_.LastWriteTime }
+        | Join-String Name -f '{0}' -sep  ', ' -op 'RecentFiles: '
+
+}
+
+#endregion folders and path utils
