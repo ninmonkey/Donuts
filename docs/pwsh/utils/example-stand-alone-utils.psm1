@@ -484,27 +484,28 @@ function NewDir.By {
         }
         default { Throw "UnhandledTemplateName: $TemplateName"}
     }
+    write-warning 'logic not finished for new paths'
+
     if( Test-Path $newName ) {
         $newName | Get-Item
             | Join-String Name -op 'Enter existing dir: '
             | New-Text -fg '#ebecf0' -bg '#4d4d4d'
             | Write-Host
         pushd $newName
-        gci . | Sort LastWriteTime
+        # gci . | Sort LastWriteTime
+        GetRecentItems
         return
     }
 
     $item = New-Item -ItemType Directory -Path $newName  -WhatIf:$WhatIfPreference -Force:$Force
     pushd $Item
 
+    GetRecentItems
+
     $newName | Get-Item
             | Join-String Name -op 'Enter new dir: '
             | New-Text -fg '#ebecf0' -bg '#4d4d4d'
             | Write-Host
-
-    'Enter new dir...'
-        | New-Text -fg '#ebecf0' -bg '#4d4d4d'
-        | Write-Host
 }
 
 
